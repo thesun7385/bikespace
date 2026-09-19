@@ -51,7 +51,7 @@ function HeroBlock({
             className={styles.buttonLink}
             data-umami-event="bike-stolen-map-from-frontpage"
           >
-            Bike stolen history
+            Reported bike theft map
           </a>
         </div>
       </div>

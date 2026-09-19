@@ -13,6 +13,7 @@ const nextConfig = {
     missingSuspenseWithCSRBailout: false,
   },
   env: {
+    DATA_BICYCLE_THEFT: process.env.DATA_BICYCLE_THEFT,
     BIKESPACE_API_URL: process.env.BIKESPACE_API_URL,
     BIKESPACE_API_URL_DASHBOARD: process.env.BIKESPACE_API_URL_DASHBOARD,
     MAPTILER_API_KEY: process.env.MAPTILER_API_KEY,

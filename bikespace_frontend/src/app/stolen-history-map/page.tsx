@@ -1,7 +1,7 @@
 'use client';
 
-import {StolenHistoryMapPage} from '@/components/stolen-history';
+import {BikeTheftMapPage} from '@/components/biketheft-map';
 
 export default function Page() {
-  return <StolenHistoryMapPage />;
+  return <BikeTheftMapPage />;
 }

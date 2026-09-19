@@ -1,3 +1,3 @@
-import {StolenHistoryMapLayout} from '@/components/stolen-history';
+import {BikeTheftMapLayout} from '@/components/biketheft-map';
 
-export default StolenHistoryMapLayout;
+export default BikeTheftMapLayout;
