@@ -6,6 +6,44 @@ import {useBikeTheftDataQuery} from '@/hooks/use-bike-theft-data-query';
 const mockExpandCluster = jest.fn().mockResolvedValue(15);
 const mockEaseTo = jest.fn();
 
+it('updates the incident year range with the dataset, independently of filters', async () => {
+  const queryMock = jest.mocked(useBikeTheftDataQuery);
+  const originalQuery = queryMock.getMockImplementation()!;
+  const initial = originalQuery();
+  try {
+    const user = userEvent.setup();
+    const {rerender} = render(<BikeTheftMapPage />);
+    expect(
+      screen.getByRole('heading', {name: 'Bike Theft Reports, 2024–2025'})
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', {name: 'Stolen'}));
+    expect(
+      screen.getByRole('heading', {name: 'Bike Theft Reports, 2024–2025'})
+    ).toBeInTheDocument();
+    const updated = [
+      ...initial.data!,
+      {...initial.data![0], id: 'new', date: '2026-01-01'},
+    ];
+    queryMock.mockReturnValue({...initial, data: updated});
+    rerender(<BikeTheftMapPage />);
+    expect(
+      screen.getByRole('heading', {name: 'Bike Theft Reports, 2024–2026'})
+    ).toBeInTheDocument();
+    queryMock.mockReturnValue({...initial, data: [updated[2]]});
+    rerender(<BikeTheftMapPage />);
+    expect(
+      screen.getByRole('heading', {name: 'Bike Theft Reports, 2026'})
+    ).toBeInTheDocument();
+    queryMock.mockReturnValue({...initial, data: []});
+    rerender(<BikeTheftMapPage />);
+    expect(
+      screen.getByRole('heading', {name: /Bike Theft Reports/})
+    ).not.toHaveTextContent(/\d{4}/);
+  } finally {
+    queryMock.mockImplementation(originalQuery);
+  }
+});
+
 // Run the tests in the Toronto timezone
 // : TZ='America/Toronto' npx jest --runInBand --coverage=false src/hooks/use-bike-theft-data-query.test.ts src/components/biketheft-map/biketheft-map-page/BikeTheftMapPage.test.tsx
 
@@ -423,31 +461,45 @@ it('applies calendar-year presets and clears their active state for custom dates
   }
 });
 
-it('preserves the dataset-based three-year preset and supports clearing dates', async () => {
-  const user = userEvent.setup();
-  render(<BikeTheftMapPage />);
-  await user.selectOptions(screen.getByLabelText('Filter by location'), 'all');
-  await user.click(screen.getByRole('button', {name: 'Last 3 years'}));
-  expect(screen.getByLabelText('From')).toHaveValue('2023-01-01');
-  expect(screen.getByLabelText('To')).toHaveValue('2025-12-31');
-  expect(screen.getByTestId('stolen-bikes')).toHaveTextContent(
-    'Red mountain bike'
-  );
-  fireEvent.change(screen.getByLabelText('From'), {
-    target: {value: '2024-01-01'},
-  });
-  expect(screen.getByRole('button', {name: 'Last 3 years'})).toHaveAttribute(
-    'aria-pressed',
-    'false'
-  );
-  await user.click(screen.getByRole('button', {name: 'All Dates'}));
-  expect(screen.getByLabelText('From')).toHaveValue('');
-  expect(screen.getByLabelText('To')).toHaveValue('');
-  expect(screen.getByRole('button', {name: 'All Dates'})).toHaveAttribute(
-    'aria-pressed',
-    'true'
-  );
-});
+it.each([
+  ['Last 2 years', '2024-01-01'],
+  ['Last 3 years', '2023-01-01'],
+  ['Last 4 years', '2022-01-01'],
+])(
+  'applies the dataset-based %s preset and supports clearing dates',
+  async (label, start) => {
+    const user = userEvent.setup();
+    render(<BikeTheftMapPage />);
+    await user.selectOptions(
+      screen.getByLabelText('Filter by location'),
+      'all'
+    );
+    await user.click(screen.getByRole('button', {name: label}));
+    expect(screen.getByLabelText('From')).toHaveValue(start);
+    expect(screen.getByRole('button', {name: label})).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByLabelText('To')).toHaveValue('2025-12-31');
+    expect(screen.getByTestId('stolen-bikes')).toHaveTextContent(
+      'Red mountain bike'
+    );
+    fireEvent.change(screen.getByLabelText('From'), {
+      target: {value: '2024-02-01'},
+    });
+    expect(screen.getByRole('button', {name: label})).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    await user.click(screen.getByRole('button', {name: 'All Dates'}));
+    expect(screen.getByLabelText('From')).toHaveValue('');
+    expect(screen.getByLabelText('To')).toHaveValue('');
+    expect(screen.getByRole('button', {name: 'All Dates'})).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  }
+);
 
 it('marks overlapping stolen and recovered reports as mixed, respecting filters', async () => {
   const user = userEvent.setup();

@@ -48,8 +48,20 @@ export function BikeTheftFilters({
       disabled: false,
     },
     {
+      label: 'Last 2 years',
+      start: latestYear ? `${latestYear - 1}-01-01` : '',
+      end: latestYear ? `${latestYear}-12-31` : '',
+      disabled: latestYear === null,
+    },
+    {
       label: 'Last 3 years',
       start: latestYear ? `${latestYear - 2}-01-01` : '',
+      end: latestYear ? `${latestYear}-12-31` : '',
+      disabled: latestYear === null,
+    },
+    {
+      label: 'Last 4 years',
+      start: latestYear ? `${latestYear - 3}-01-01` : '',
       end: latestYear ? `${latestYear}-12-31` : '',
       disabled: latestYear === null,
     },

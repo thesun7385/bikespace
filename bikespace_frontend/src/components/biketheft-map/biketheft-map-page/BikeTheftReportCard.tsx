@@ -6,11 +6,13 @@ import parkingStyles from '@/components/parking-map/parking-map-page/parking-map
 import styles from './bike-theft-report-card.module.scss';
 
 interface BikeTheftReportCardProps {
+  reportYearRange: string;
   selectedReports: StolenBikeReport[];
   cardRef: RefObject<HTMLDivElement>;
   onClearSelection: () => void;
 }
 export function BikeTheftReportCard({
+  reportYearRange,
   selectedReports,
   cardRef,
   onClearSelection,
@@ -18,7 +20,9 @@ export function BikeTheftReportCard({
   return (
     <div className={parkingStyles.ContentCard} ref={cardRef}>
       <div className={parkingStyles.ContentHeading}>
-        <h2 className={parkingStyles.cardHeading}>Bike Theft History</h2>
+        <h2 className={parkingStyles.cardHeading}>
+          Bike Theft Reports, {reportYearRange}
+        </h2>
       </div>
       {/* --- Render card--- */}
       {selectedReports.length > 0 ? (

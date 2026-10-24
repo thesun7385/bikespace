@@ -107,6 +107,20 @@ export function BikeTheftMapPage() {
     [stolenBikeReports]
   );
 
+  const reportYearRange = React.useMemo(() => {
+    let firstYear = Infinity;
+    let lastYear = -Infinity;
+    for (const report of stolenBikeReports) {
+      const match = /^(\d{4})-\d{2}-\d{2}/.exec(report.date);
+      if (!match) continue;
+      const year = Number(match[1]);
+      firstYear = Math.min(firstYear, year);
+      lastYear = Math.max(lastYear, year);
+    }
+    if (!Number.isFinite(firstYear)) return '';
+    return firstYear === lastYear ? `${firstYear}` : `${firstYear}–${lastYear}`;
+  }, [stolenBikeReports]);
+
   const availableLocations = React.useMemo(() => {
     const locations = new Set(stolenBikeReports.map(r => r.location));
     return Array.from(locations).sort();
@@ -244,6 +258,7 @@ export function BikeTheftMapPage() {
           )}
           {/* --- Report detail card --- */}
           <BikeTheftReportCard
+            reportYearRange={reportYearRange}
             selectedReports={selectedReports}
             cardRef={resultsCardRef}
             onClearSelection={handleClearSelection}
